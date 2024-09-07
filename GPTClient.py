@@ -39,15 +39,12 @@ class GPTClient:
         text_chunks = chunk_text(text)
 
         for question in questions:
-            print(question)
             full_answer = None
             for chunk in text_chunks:
-                print("..")
                 response = self.__get_answer_with_confidence(chunk, question)
                 if response["confidence"] == 100.00:
                     full_answer = response["answer"]
                     break
-            print(response)
             if full_answer:
                 answers[question] =full_answer.strip()
             else:

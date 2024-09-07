@@ -1,10 +1,12 @@
+import argparse
+import os
 from PDFParser import PDFParser
 from GPTClient import GPTClient
 from Notifier import SlackNotifier
 from dotenv import load_dotenv
-import os
+from constant import QUESTIONS
 
-def main():
+def main(pdf_file):
     # Load environment variables
     load_dotenv()
 
@@ -18,7 +20,7 @@ def main():
 
     # Extract text from PDF
     try:
-        pdf_client = PDFParser("handbook.pdf")
+        pdf_client = PDFParser(pdf_file)
         text = pdf_client.extract_text()
     except Exception as e:
         raise RuntimeError(f"Failed to extract text from PDF: {e}")
@@ -29,15 +31,8 @@ def main():
     except Exception as e:
         raise RuntimeError(f"Failed to initialize GPT client: {e}")
 
-    # Define questions and get answers
-    questions = [
-        "What is the name of the company?", 
-        "Who is the CEO of the company?",
-        "What is phototsynthesis?"
-    ]
-
     try:
-        answers = gpt_client.answer_questions(text, questions)
+        answers = gpt_client.answer_questions(text, QUESTIONS)
     except Exception as e:
         raise RuntimeError(f"Failed to get answers from GPT client: {e}")
 
@@ -53,4 +48,12 @@ def main():
     print("Process completed successfully.")
 
 if __name__ == "__main__":
-    main()
+    # Set up argparse to accept the PDF file as a command-line argument
+    parser = argparse.ArgumentParser(description="Process a PDF, extract text, and send answers to Slack.")
+    parser.add_argument("pdf_file", help="The path to the PDF file you want to process.")
+    
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Run the main function with the provided PDF file
+    main(args.pdf_file)
